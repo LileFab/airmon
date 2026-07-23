@@ -149,11 +149,8 @@ function updateCharts(points) {
   lastPoints = points;
   METRICS.forEach((m) => {
     const chart = charts[m.key];
-    // Affichage arrondi aux décimales voulues (la base conserve la précision complète).
-    chart.data.datasets[0].data = points.map((p) => ({
-      x: p.t,
-      y: p[m.key] == null ? null : Number(Number(p[m.key]).toFixed(m.digits)),
-    }));
+    // Courbe lissée : données pleines. L'axe Y et l'infobulle sont formatés au dixième.
+    chart.data.datasets[0].data = points.map((p) => ({ x: p.t, y: p[m.key] }));
     chart.update();
   });
 }
