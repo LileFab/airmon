@@ -1,6 +1,6 @@
 [Unit]
 Description=BME680 collector (mesures -> SQLite)
-After=multi-user.target
+After=network.target
 
 [Service]
 Type=simple
