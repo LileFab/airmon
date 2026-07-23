@@ -1,9 +1,11 @@
 "use strict";
 
+// digits = décimales affichées (courbe/tuile/infobulle) ; la base garde la précision complète.
+// yDigits (si défini) force l'axe Y à cette précision, sinon format par défaut.
 const METRICS = [
-  { key: "temperature",    label: "Température",       unit: "°C",  digits: 1 },
-  { key: "humidity",       label: "Humidité",          unit: "%",   digits: 1 },
-  { key: "pressure",       label: "Pression",          unit: "hPa", digits: 1 },
+  { key: "temperature",    label: "Température",       unit: "°C",  digits: 1, yDigits: 1 },
+  { key: "humidity",       label: "Humidité",          unit: "%",   digits: 1, yDigits: 1 },
+  { key: "pressure",       label: "Pression",          unit: "hPa", digits: 1, yDigits: 1 },
   { key: "gas_resistance", label: "Résistance de gaz", unit: "Ω",   digits: 0 },
   { key: "air_quality",    label: "Indice air",        unit: "/100",digits: 1 },
 ];
@@ -101,6 +103,10 @@ function makeChart(metric) {
             color: cssVar("--muted"),
             font: { family: "system-ui, sans-serif", size: 11 },
             padding: 8,
+            // Axe Y au dixième pour temp/humidité/pression (évite les centièmes/millièmes).
+            ...(metric.yDigits != null
+              ? { precision: metric.yDigits, callback: (v) => Number(v).toFixed(metric.yDigits) }
+              : {}),
           },
         },
       },
@@ -143,7 +149,11 @@ function updateCharts(points) {
   lastPoints = points;
   METRICS.forEach((m) => {
     const chart = charts[m.key];
-    chart.data.datasets[0].data = points.map((p) => ({ x: p.t, y: p[m.key] }));
+    // Affichage arrondi aux décimales voulues (la base conserve la précision complète).
+    chart.data.datasets[0].data = points.map((p) => ({
+      x: p.t,
+      y: p[m.key] == null ? null : Number(Number(p[m.key]).toFixed(m.digits)),
+    }));
     chart.update();
   });
 }
