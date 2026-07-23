@@ -1,0 +1,14 @@
+[Unit]
+Description=BME680 collector (mesures -> SQLite)
+After=multi-user.target
+
+[Service]
+Type=simple
+User=fabien
+WorkingDirectory=/opt/airmon
+ExecStart=/opt/airmon/venv/bin/python /opt/airmon/collector.py
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

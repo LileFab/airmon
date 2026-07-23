@@ -1,0 +1,120 @@
+:root {
+  color-scheme: light;
+  --page:           #f9f9f7;
+  --surface:        #fcfcfb;
+  --text-primary:   #0b0b0b;
+  --text-secondary: #52514e;
+  --muted:          #898781;
+  --grid:           #e1e0d9;
+  --axis:           #c3c2b7;
+  --border:         rgba(11,11,11,0.10);
+
+  --c-temperature:  #eb6834;  /* orange */
+  --c-humidity:     #2a78d6;  /* blue   */
+  --c-pressure:     #4a3aa7;  /* violet */
+  --c-gas_resistance: #1baf7a;/* aqua   */
+  --c-air_quality:  #008300;  /* green  */
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --page:           #0d0d0d;
+    --surface:        #1a1a19;
+    --text-primary:   #ffffff;
+    --text-secondary: #c3c2b7;
+    --muted:          #898781;
+    --grid:           #2c2c2a;
+    --axis:           #383835;
+    --border:         rgba(255,255,255,0.10);
+
+    --c-temperature:  #d95926;
+    --c-humidity:     #3987e5;
+    --c-pressure:     #9085e9;
+    --c-gas_resistance: #199e70;
+    --c-air_quality:  #008300;
+  }
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --page:           #0d0d0d;
+  --surface:        #1a1a19;
+  --text-primary:   #ffffff;
+  --text-secondary: #c3c2b7;
+  --muted:          #898781;
+  --grid:           #2c2c2a;
+  --axis:           #383835;
+  --border:         rgba(255,255,255,0.10);
+
+  --c-temperature:  #d95926;
+  --c-humidity:     #3987e5;
+  --c-pressure:     #9085e9;
+  --c-gas_resistance: #199e70;
+  --c-air_quality:  #008300;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--page);
+  color: var(--text-primary);
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  padding: 20px clamp(12px, 3vw, 32px) 40px;
+}
+
+.topbar {
+  display: flex; flex-wrap: wrap; gap: 16px;
+  align-items: flex-end; justify-content: space-between;
+  margin-bottom: 20px;
+}
+.title-block h1 { margin: 0; font-size: 1.5rem; letter-spacing: -0.01em; }
+.sub { margin: 4px 0 0; color: var(--text-secondary); font-size: 0.85rem; }
+
+.controls { display: flex; align-items: center; gap: 10px; }
+.ranges { display: inline-flex; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 3px; }
+.ranges button {
+  border: 0; background: transparent; color: var(--text-secondary);
+  font: inherit; font-size: 0.82rem; padding: 6px 11px; border-radius: 8px; cursor: pointer;
+}
+.ranges button:hover { color: var(--text-primary); }
+.ranges button.active { background: var(--c-humidity); color: #fff; }
+
+.theme-toggle {
+  border: 1px solid var(--border); background: var(--surface); color: var(--text-secondary);
+  width: 36px; height: 34px; border-radius: 10px; cursor: pointer; font-size: 1rem;
+}
+
+.tiles {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px; margin-bottom: 20px;
+}
+.tile {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 14px;
+  padding: 14px 16px;
+}
+.tile .label { color: var(--text-secondary); font-size: 0.78rem; display: flex; align-items: center; gap: 7px; }
+.tile .dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
+.tile .value { font-size: 1.7rem; margin-top: 6px; letter-spacing: -0.02em; }
+.tile .value small { font-size: 0.9rem; color: var(--muted); font-weight: 400; margin-left: 3px; }
+
+.grid {
+  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px;
+}
+.card {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 14px;
+  padding: 14px 16px 10px; margin: 0;
+}
+.card.wide { grid-column: 1 / -1; }
+.card figcaption { font-size: 0.9rem; font-weight: 600; margin-bottom: 8px; }
+.card figcaption .unit { color: var(--muted); font-weight: 400; font-size: 0.8rem; }
+.canvas-wrap { position: relative; height: 240px; }
+.card.wide .canvas-wrap { height: 260px; }
+
+.foot { margin-top: 22px; color: var(--muted); font-size: 0.78rem; text-align: center; }
+
+@media (max-width: 720px) {
+  .grid { grid-template-columns: 1fr; }
+  .card.wide { grid-column: auto; }
+}

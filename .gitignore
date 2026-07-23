@@ -1,0 +1,12 @@
+# base de données et état runtime (généré sur le Pi)
+data/
+*.db
+*.db-wal
+*.db-shm
+*.bak-*
+gas_baseline.json
+
+# python
+venv/
+__pycache__/
+*.pyc

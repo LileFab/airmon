@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Qualité de l'air — BME680</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="title-block">
+      <h1>Qualité de l'air</h1>
+      <p class="sub" id="status">Chargement…</p>
+    </div>
+    <div class="controls">
+      <div class="ranges" id="ranges" role="tablist" aria-label="Plage temporelle">
+        <button data-range="1h">1 h</button>
+        <button data-range="6h">6 h</button>
+        <button data-range="24h" class="active">24 h</button>
+        <button data-range="7d">7 j</button>
+        <button data-range="30d">30 j</button>
+        <button data-range="all">Tout</button>
+      </div>
+      <button id="theme-toggle" class="theme-toggle" title="Thème clair / sombre" aria-label="Basculer le thème">◐</button>
+    </div>
+  </header>
+
+  <section class="tiles" id="tiles"></section>
+
+  <main class="grid">
+    <figure class="card"><figcaption>Température <span class="unit">°C</span></figcaption><div class="canvas-wrap"><canvas id="c-temperature"></canvas></div></figure>
+    <figure class="card"><figcaption>Humidité <span class="unit">%</span></figcaption><div class="canvas-wrap"><canvas id="c-humidity"></canvas></div></figure>
+    <figure class="card"><figcaption>Pression <span class="unit">hPa</span></figcaption><div class="canvas-wrap"><canvas id="c-pressure"></canvas></div></figure>
+    <figure class="card"><figcaption>Résistance de gaz <span class="unit">Ω</span></figcaption><div class="canvas-wrap"><canvas id="c-gas_resistance"></canvas></div></figure>
+    <figure class="card wide"><figcaption>Indice qualité d'air <span class="unit">0–100</span></figcaption><div class="canvas-wrap"><canvas id="c-air_quality"></canvas></div></figure>
+  </main>
+
+  <footer class="foot">
+    <span id="count"></span> · rafraîchi toutes les 30 s · BME680 @ 0x77 · <a href="/api/docs">API (Swagger)</a>
+  </footer>
+
+  <script src="/static/chart.umd.min.js"></script>
+  <script src="/static/app.js"></script>
+</body>
+</html>

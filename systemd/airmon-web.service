@@ -1,0 +1,14 @@
+[Unit]
+Description=BME680 dashboard web (Flask/waitress, port 8080)
+After=network.target airmon-collector.service
+
+[Service]
+Type=simple
+User=fabien
+WorkingDirectory=/opt/airmon
+ExecStart=/opt/airmon/venv/bin/python /opt/airmon/webapp.py
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

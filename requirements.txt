@@ -1,0 +1,5 @@
+flask
+waitress
+bme680
+smbus2
+flask-swagger-ui
