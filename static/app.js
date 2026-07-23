@@ -168,6 +168,30 @@ function renderTiles(latest) {
   }).join("");
 }
 
+function fmtUptime(seconds) {
+  if (seconds == null) return null;
+  const d = Math.floor(seconds / 86400);
+  const h = Math.floor((seconds % 86400) / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  if (d > 0) return `${d} j ${h} h`;
+  if (h > 0) return `${h} h ${m} min`;
+  return `${m} min`;
+}
+
+async function refreshSystem() {
+  try {
+    const res = await fetch(`/api/system`);
+    const sys = await res.json();
+    const parts = [];
+    if (sys.cpu_temp != null) parts.push(`Pi ${sys.cpu_temp.toFixed(1)} °C`);
+    const uptime = fmtUptime(sys.uptime_seconds);
+    if (uptime) parts.push(`up ${uptime}`);
+    document.getElementById("pi-status").textContent = parts.join(" · ");
+  } catch (e) {
+    document.getElementById("pi-status").textContent = "";
+  }
+}
+
 async function refresh() {
   try {
     const [dataRes, latestRes] = await Promise.all([
@@ -195,6 +219,7 @@ async function refresh() {
   } catch (e) {
     document.getElementById("status").textContent = "Erreur de connexion au serveur";
   }
+  refreshSystem();
 }
 
 function restyleCharts() {

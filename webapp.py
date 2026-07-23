@@ -78,6 +78,22 @@ OPENAPI_SPEC = {
                 }},
             }
         },
+        "/api/system": {
+            "get": {
+                "summary": "État du Raspberry Pi",
+                "description": "Température CPU du Pi et uptime, indépendants des mesures du capteur.",
+                "responses": {"200": {
+                    "description": "État système.",
+                    "content": {"application/json": {"schema": {
+                        "type": "object",
+                        "properties": {
+                            "cpu_temp": {"type": "number", "nullable": True, "description": "Température CPU du Pi en °C."},
+                            "uptime_seconds": {"type": "number", "nullable": True, "description": "Uptime du Pi en secondes."},
+                        },
+                    }}},
+                }},
+            }
+        },
         "/api/latest": {
             "get": {
                 "summary": "Dernière mesure + total",
@@ -111,6 +127,33 @@ app.register_blueprint(swaggerui_bp, url_prefix=SWAGGER_URL)
 @app.route(OPENAPI_URL)
 def openapi_spec():
     return jsonify(OPENAPI_SPEC)
+
+
+THERMAL_ZONE = "/sys/class/thermal/thermal_zone0/temp"
+
+
+def read_cpu_temp():
+    try:
+        with open(THERMAL_ZONE) as f:
+            return round(int(f.read().strip()) / 1000, 1)
+    except (OSError, ValueError):
+        return None
+
+
+def read_uptime_seconds():
+    try:
+        with open("/proc/uptime") as f:
+            return round(float(f.read().split()[0]), 0)
+    except (OSError, ValueError, IndexError):
+        return None
+
+
+@app.route("/api/system")
+def api_system():
+    return jsonify({
+        "cpu_temp": read_cpu_temp(),
+        "uptime_seconds": read_uptime_seconds(),
+    })
 
 
 def query_db(range_key):
