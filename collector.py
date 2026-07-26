@@ -25,7 +25,7 @@ BURN_IN_SAMPLES = 10          # nb de lectures stables pour établir la baseline
 BASELINE_MAX_AGE = 7 * 86400  # on refait la chauffe si la baseline est plus vieille que ça
 HUM_BASELINE = 40.0           # humidité "idéale" en %
 HUM_WEIGHTING = 0.25          # part de l'humidité dans l'indice (gaz = 0.75)
-TEMP_OFFSET = -1.6            # correction °C (calibré : 28 °C pièce vs 29.63 °C brut, 2026-07-23)
+TEMP_OFFSET = -2.5            # correction °C (recalibré 2026-07-26 ; ancien -1.6)
 
 
 def init_db():
