@@ -23,14 +23,36 @@ graphes d'évolution dans le temps.
 |---|---|
 | `collector.py` | Lit le BME680 toutes les 30 s → écrit dans `data/airmon.db`. |
 | `webapp.py` | Serveur Flask (via waitress) : dashboard + API JSON + Swagger, port **8080**. |
+| `eink_display.py` | Affiche les dernières mesures sur l'écran e-ink (rafraîchi toutes les 2 min). |
 | `static/` | Dashboard (HTML/CSS/JS) + Chart.js vendored. |
-| `systemd/` | Unités `airmon-collector` et `airmon-web`. |
+| `eink/` | Pilote Waveshare `epd2in9d` vendored (aucune dépendance réseau). |
+| `systemd/` | Unités `airmon-collector`, `airmon-web` et `airmon-eink`. |
 
 ## Prérequis matériel
 
 - Raspberry Pi sous Debian, **I2C activé** (`sudo raspi-config` → Interface Options → I2C).
 - BME680 câblé en I2C (SDA/SCL). Adresse par défaut **0x77** (repli 0x76 géré).
 - Vérifier la détection : `sudo i2cdetect -y 1`.
+
+### Écran e-ink (optionnel)
+
+- **Dalle Waveshare 2.9″ WFT0290CZ10** (296 × 128, noir/blanc, contrôleur *busy = bas*)
+  sur l'**Universal e-Paper Driver HAT**. Pilote **`epd2in9d`**.
+- **Non stacké sur le header** (le BME680 occupe l'I2C) : relié par le **câble 9 broches**,
+  sur des broches disjointes de l'I2C. **SPI activé** (`install.sh` le fait ; reboot requis).
+- Switches du Driver HAT : **Display Config = A (3R)**, **Interface Config = B (4-line SPI)**.
+- Câblage (fil e-Paper → broche physique Pi) :
+
+  | VCC | GND | DIN | CLK | CS | DC | RST | BUSY | PWR |
+  |---|---|---|---|---|---|---|---|---|
+  | 17 | 20 | 19 | 23 | 24 | 22 | 11 | 18 | 12 |
+
+  (BCM : DIN=GPIO10, CLK=GPIO11, CS=GPIO8, DC=GPIO25, RST=GPIO17, BUSY=GPIO24, PWR=GPIO18 —
+  aucun conflit avec l'I2C du BME680 sur GPIO2/GPIO3.)
+- Rafraîchissement toutes les **2 min** (~3,5 s par rafraîchissement complet).
+  Vérifier : `ls /dev/spidev*` doit lister `spidev0.0`.
+- ⚠️ La **nappe FPC** dalle↔Driver HAT doit être insérée contacts dans le bon sens et
+  loquet verrouillé, sinon écran muet.
 
 ## Installation (sur le Pi)
 
@@ -62,8 +84,9 @@ puis `sudo systemctl restart airmon-collector`.
 ## Exploitation
 
 ```bash
-sudo systemctl status airmon-collector airmon-web
+sudo systemctl status airmon-collector airmon-web airmon-eink
 journalctl -u airmon-collector -f      # logs du collecteur
+journalctl -u airmon-eink -f           # logs de l'écran e-ink
 sudo systemctl restart airmon-collector
 ```
 

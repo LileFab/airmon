@@ -3,3 +3,6 @@ waitress
 bme680
 smbus2
 flask-swagger-ui
+# Écran e-ink : Pillow / spidev / gpiozero / lgpio viennent des paquets apt
+# (python3-pil, python3-spidev, python3-gpiozero, python3-lgpio) et sont vus
+# par le venv grâce à --system-site-packages (voir install.sh).
