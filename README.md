@@ -23,7 +23,7 @@ graphes d'évolution dans le temps.
 |---|---|
 | `collector.py` | Lit le BME680 toutes les 30 s → écrit dans `data/airmon.db`. |
 | `webapp.py` | Serveur Flask (via waitress) : dashboard + API JSON + Swagger, port **8080**. |
-| `eink_display.py` | Affiche les dernières mesures sur l'écran e-ink (rafraîchi toutes les 2 min). |
+| `eink_display.py` | Écrans e-ink cyclables (bouton) : air intérieur + météo actuelle. |
 | `static/` | Dashboard (HTML/CSS/JS) + Chart.js vendored. |
 | `eink/` | Pilote Waveshare `epd2in9d` vendored (aucune dépendance réseau). |
 | `systemd/` | Unités `airmon-collector`, `airmon-web` et `airmon-eink`. |
@@ -53,6 +53,26 @@ graphes d'évolution dans le temps.
   Vérifier : `ls /dev/spidev*` doit lister `spidev0.0`.
 - ⚠️ La **nappe FPC** dalle↔Driver HAT doit être insérée contacts dans le bon sens et
   loquet verrouillé, sinon écran muet.
+
+#### Écrans cyclables + bouton
+
+`eink_display.py` affiche plusieurs **écrans** qu'on fait défiler avec un **bouton
+poussoir** :
+
+- **Air intérieur** : température / humidité / indice qualité d'air (BME680).
+- **Météo actuelle** : conditions à Lyon via **Open-Meteo** (gratuit, **sans clé API**,
+  `urllib` stdlib). Localisation en dur (`LAT/LON/CITY` en tête de `eink_display.py`).
+  Rafraîchie en tâche de fond toutes les 15 min ; si le réseau tombe, l'écran affiche
+  « Meteo indisponible » et le reste continue de fonctionner.
+
+**Bouton** : poussoir momentané entre **GPIO26 (broche physique 37)** et **GND (broche
+39)** — pull-up interne, aucun résistor. Chaque appui passe à l'écran suivant (~4 s, le
+temps d'un rafraîchissement). Sans bouton câblé, le service tourne quand même sur le
+premier écran.
+
+**Ajouter un écran** : écrire une fonction `render_xxx() -> PIL.Image` (296×128) dans
+`eink_display.py` — en réutilisant `draw_header()` — puis l'ajouter à la liste `VIEWS`.
+Rien d'autre à toucher.
 
 ## Installation (sur le Pi)
 
