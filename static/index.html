@@ -31,7 +31,16 @@
   <section class="tiles" id="tiles"></section>
 
   <main class="grid">
-    <figure class="card"><figcaption>Température <span class="unit">°C</span></figcaption><div class="canvas-wrap"><canvas id="c-temperature"></canvas></div></figure>
+    <figure class="card">
+      <figcaption class="cap-row">
+        <span>Température <span class="unit">°C</span></span>
+        <span class="legend">
+          <span class="lg-item"><span class="sw" style="background:var(--c-temperature)"></span>Intérieur</span>
+          <button type="button" class="lg-item lg-toggle" id="outdoor-toggle" aria-pressed="true"><span class="sw sw-dash"></span>Extérieur · Lyon</button>
+        </span>
+      </figcaption>
+      <div class="canvas-wrap"><canvas id="c-temperature"></canvas></div>
+    </figure>
     <figure class="card"><figcaption>Humidité <span class="unit">%</span></figcaption><div class="canvas-wrap"><canvas id="c-humidity"></canvas></div></figure>
     <figure class="card"><figcaption>Pression <span class="unit">hPa</span></figcaption><div class="canvas-wrap"><canvas id="c-pressure"></canvas></div></figure>
     <figure class="card"><figcaption>Résistance de gaz <span class="unit">Ω</span></figcaption><div class="canvas-wrap"><canvas id="c-gas_resistance"></canvas></div></figure>

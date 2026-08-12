@@ -78,6 +78,30 @@ OPENAPI_SPEC = {
                 }},
             }
         },
+        "/api/outdoor": {
+            "get": {
+                "summary": "Température extérieure (série temporelle)",
+                "description": "Température extérieure horaire (Open-Meteo) sur une plage donnée, "
+                               "pour superposition au graphe de température intérieure.",
+                "parameters": [{
+                    "name": "range",
+                    "in": "query",
+                    "required": False,
+                    "description": "Plage temporelle.",
+                    "schema": {"type": "string", "enum": ["1h", "6h", "24h", "7d", "30d", "all"], "default": "24h"},
+                }],
+                "responses": {"200": {
+                    "description": "Points horaires de température extérieure.",
+                    "content": {"application/json": {"schema": {
+                        "type": "object",
+                        "properties": {
+                            "range": {"type": "string", "example": "24h"},
+                            "points": {"type": "array", "items": {"$ref": "#/components/schemas/OutdoorPoint"}},
+                        },
+                    }}},
+                }},
+            }
+        },
         "/api/system": {
             "get": {
                 "summary": "État du Raspberry Pi",
@@ -114,7 +138,13 @@ OPENAPI_SPEC = {
             }
         },
     },
-    "components": {"schemas": {"Measurement": {"type": "object", "properties": _MEASUREMENT_PROPS}}},
+    "components": {"schemas": {
+        "Measurement": {"type": "object", "properties": _MEASUREMENT_PROPS},
+        "OutdoorPoint": {"type": "object", "properties": {
+            "t":           {"type": "integer", "format": "int64", "description": "Horodatage epoch en millisecondes (UTC)."},
+            "temperature": {"type": "number", "description": "Température extérieure en °C."},
+        }},
+    }},
 }
 
 swaggerui_bp = get_swaggerui_blueprint(
@@ -215,6 +245,36 @@ def api_data():
     if range_key not in RANGES:
         range_key = "24h"
     return jsonify({"range": range_key, "points": query_db(range_key)})
+
+
+def query_outdoor(range_key):
+    since, _ = RANGES.get(range_key, RANGES["24h"])
+    con = sqlite3.connect(DB_PATH)
+    con.row_factory = sqlite3.Row
+    try:
+        if since is None:
+            rows = con.execute(
+                "SELECT ts, temperature FROM outdoor_temperature ORDER BY ts"
+            ).fetchall()
+        else:
+            start = int(time.time()) - since
+            rows = con.execute(
+                "SELECT ts, temperature FROM outdoor_temperature WHERE ts >= ? ORDER BY ts",
+                (start,),
+            ).fetchall()
+    except sqlite3.OperationalError:
+        return []  # table absente (service météo jamais lancé)
+    finally:
+        con.close()
+    return [{"t": row["ts"] * 1000, "temperature": row["temperature"]} for row in rows]
+
+
+@app.route("/api/outdoor")
+def api_outdoor():
+    range_key = request.args.get("range", "24h")
+    if range_key not in RANGES:
+        range_key = "24h"
+    return jsonify({"range": range_key, "points": query_outdoor(range_key)})
 
 
 @app.route("/api/latest")

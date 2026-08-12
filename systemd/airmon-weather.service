@@ -1,0 +1,15 @@
+[Unit]
+Description=airmon météo (température extérieure Open-Meteo -> SQLite)
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=simple
+User=fabien
+WorkingDirectory=/opt/airmon
+ExecStart=/opt/airmon/venv/bin/python /opt/airmon/weather.py
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

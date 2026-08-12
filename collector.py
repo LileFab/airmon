@@ -44,6 +44,14 @@ def init_db():
         )
     """)
     con.execute("CREATE INDEX IF NOT EXISTS idx_measurements_ts ON measurements(ts)")
+    # Température extérieure (Open-Meteo), remplie par weather.py. Créée ici aussi pour
+    # que l'API /api/outdoor ne casse jamais même si le service météo n'a pas tourné.
+    con.execute("""
+        CREATE TABLE IF NOT EXISTS outdoor_temperature (
+            ts          INTEGER PRIMARY KEY,   -- epoch secondes UTC, aligné à l'heure
+            temperature REAL
+        )
+    """)
     con.commit()
     return con
 

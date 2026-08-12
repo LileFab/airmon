@@ -24,8 +24,8 @@ sudo raspi-config nonint do_spi 0 || echo "   (raspi-config indisponible : activ
 echo ">> Installation dans $APP_DIR"
 sudo mkdir -p "$APP_DIR"
 sudo chown -R "$USER_NAME:$USER_NAME" "$APP_DIR"
-cp -r "$SRC_DIR/collector.py" "$SRC_DIR/webapp.py" "$SRC_DIR/eink_display.py" \
-      "$SRC_DIR/static" "$SRC_DIR/eink" "$APP_DIR/"
+cp -r "$SRC_DIR/collector.py" "$SRC_DIR/webapp.py" "$SRC_DIR/weather.py" \
+      "$SRC_DIR/eink_display.py" "$SRC_DIR/static" "$SRC_DIR/eink" "$APP_DIR/"
 mkdir -p "$APP_DIR/data"
 
 echo ">> Environnement Python (--system-site-packages : accès aux libs apt SPI/GPIO/PIL)"
@@ -36,13 +36,16 @@ python3 -m venv --system-site-packages "$APP_DIR/venv"
 
 echo ">> Services systemd"
 sudo cp "$SRC_DIR/systemd/airmon-collector.service" "$SRC_DIR/systemd/airmon-web.service" \
-        "$SRC_DIR/systemd/airmon-eink.service" /etc/systemd/system/
+        "$SRC_DIR/systemd/airmon-weather.service" "$SRC_DIR/systemd/airmon-eink.service" \
+        /etc/systemd/system/
 sudo sed -i "s/^User=.*/User=$USER_NAME/" \
     /etc/systemd/system/airmon-collector.service \
     /etc/systemd/system/airmon-web.service \
+    /etc/systemd/system/airmon-weather.service \
     /etc/systemd/system/airmon-eink.service
 sudo systemctl daemon-reload
-sudo systemctl enable --now airmon-collector.service airmon-web.service airmon-eink.service
+sudo systemctl enable --now airmon-collector.service airmon-web.service \
+    airmon-weather.service airmon-eink.service
 
 echo ">> Terminé. Dashboard : http://$(hostname -I | awk '{print $1}'):8080"
 echo "   (une reconnexion peut être nécessaire pour l'accès I2C si le groupe vient d'être ajouté)"

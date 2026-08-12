@@ -23,10 +23,11 @@ graphes d'évolution dans le temps.
 |---|---|
 | `collector.py` | Lit le BME680 toutes les 30 s → écrit dans `data/airmon.db`. |
 | `webapp.py` | Serveur Flask (via waitress) : dashboard + API JSON + Swagger, port **8080**. |
+| `weather.py` | Température extérieure (Open-Meteo, Lyon) → table `outdoor_temperature`. Backfill au démarrage puis MAJ toutes les 30 min. |
 | `eink_display.py` | Écrans e-ink cyclables (bouton) : air intérieur + météo actuelle. |
 | `static/` | Dashboard (HTML/CSS/JS) + Chart.js vendored. |
 | `eink/` | Pilote Waveshare `epd2in9d` vendored (aucune dépendance réseau). |
-| `systemd/` | Unités `airmon-collector`, `airmon-web` et `airmon-eink`. |
+| `systemd/` | Unités `airmon-collector`, `airmon-web`, `airmon-weather` et `airmon-eink`. |
 
 ## Prérequis matériel
 
@@ -90,6 +91,7 @@ active les services. Dashboard ensuite sur `http://<ip-du-pi>:8080`.
 | Endpoint | Description |
 |---|---|
 | `GET /api/data?range=1h\|6h\|24h\|7d\|30d\|all` | Série temporelle sous-échantillonnée. |
+| `GET /api/outdoor?range=…` | Température extérieure horaire (Open-Meteo). |
 | `GET /api/latest` | Dernière mesure + total. |
 | `GET /api/docs` | Swagger UI. |
 | `GET /openapi.json` | Spécification OpenAPI 3.0. |

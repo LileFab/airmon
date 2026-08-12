@@ -14,6 +14,7 @@
   --c-pressure:     #4a3aa7;  /* violet */
   --c-gas_resistance: #1baf7a;/* aqua   */
   --c-air_quality:  #008300;  /* green  */
+  --c-outdoor:      #2a78d6;  /* blue — température extérieure */
 }
 
 @media (prefers-color-scheme: dark) {
@@ -33,6 +34,7 @@
     --c-pressure:     #9085e9;
     --c-gas_resistance: #199e70;
     --c-air_quality:  #008300;
+    --c-outdoor:      #3987e5;
   }
 }
 
@@ -52,6 +54,7 @@
   --c-pressure:     #9085e9;
   --c-gas_resistance: #199e70;
   --c-air_quality:  #008300;
+  --c-outdoor:      #3987e5;
 }
 
 * { box-sizing: border-box; }
@@ -111,6 +114,24 @@ body {
 .card.wide { grid-column: 1 / -1; }
 .card figcaption { font-size: 0.9rem; font-weight: 600; margin-bottom: 8px; }
 .card figcaption .unit { color: var(--muted); font-weight: 400; font-size: 0.8rem; }
+.card figcaption.cap-row {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 10px; flex-wrap: wrap;
+}
+.legend {
+  display: inline-flex; align-items: center; gap: 12px;
+  font-size: 0.75rem; font-weight: 400; color: var(--text-secondary);
+}
+.lg-item { display: inline-flex; align-items: center; gap: 6px; }
+.lg-toggle {
+  border: 0; background: transparent; color: var(--text-secondary);
+  font: inherit; cursor: pointer; padding: 2px 5px; border-radius: 6px;
+}
+.lg-toggle:hover { color: var(--text-primary); }
+.lg-toggle.off { opacity: 0.45; }
+.lg-toggle.off .sw-dash { opacity: 0.5; }
+.sw { width: 14px; height: 3px; border-radius: 2px; display: inline-block; flex: none; }
+.sw-dash { background: repeating-linear-gradient(90deg, var(--c-outdoor) 0 5px, transparent 5px 8px); }
 .canvas-wrap { position: relative; height: 240px; }
 .card.wide .canvas-wrap { height: 260px; }
 
