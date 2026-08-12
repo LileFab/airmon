@@ -14,6 +14,10 @@ let currentRange = "24h";
 let charts = {};
 let lastPoints = [];
 
+// Courbe de température extérieure (Open-Meteo) superposée au graphe température.
+const OUTDOOR_LABEL = "Extérieur · Lyon";
+let outdoorEnabled = localStorage.getItem("outdoorEnabled") !== "false"; // défaut : affichée
+
 function cssVar(name) {
   return getComputedStyle(document.body).getPropertyValue(name).trim();
 }
@@ -130,8 +134,9 @@ function makeChart(metric) {
             },
             label: (item) => {
               const v = item.parsed.y;
-              return v == null ? "—"
-                : `${v.toFixed(metric.digits)} ${metric.unit}`.replace("/100", "/100");
+              const val = v == null ? "—" : `${v.toFixed(metric.digits)} ${metric.unit}`;
+              // Graphe multi-séries (température int./ext.) : préfixer par le nom de série.
+              return item.chart.data.datasets.length > 1 ? `${item.dataset.label} : ${val}` : val;
             },
           },
         },
@@ -143,6 +148,41 @@ function makeChart(metric) {
 
 function initCharts() {
   METRICS.forEach((m) => { charts[m.key] = makeChart(m); });
+  addOutdoorSeries();
+}
+
+// Ajoute la série "extérieur" (2ᵉ dataset) au graphe température : trait bleu tireté,
+// sans remplissage. Le dataset intérieur est relabellisé "Intérieur" pour l'infobulle.
+function addOutdoorSeries() {
+  const chart = charts.temperature;
+  chart.data.datasets[0].label = "Intérieur";
+  const color = cssVar("--c-outdoor");
+  chart.data.datasets.push({
+    label: OUTDOOR_LABEL,
+    data: [],
+    borderColor: color,
+    backgroundColor: "transparent",
+    borderWidth: 2,
+    borderDash: [5, 4],
+    pointRadius: 0,
+    pointHoverRadius: 4,
+    pointHoverBackgroundColor: color,
+    pointHoverBorderColor: cssVar("--surface"),
+    pointHoverBorderWidth: 2,
+    tension: 0.3,
+    fill: false,
+    spanGaps: true,
+    hidden: !outdoorEnabled,
+  });
+  chart.update();
+}
+
+function updateOutdoor(points) {
+  const chart = charts.temperature;
+  const ds = chart.data.datasets[1];
+  if (!ds) return;
+  ds.data = points.map((p) => ({ x: p.t, y: p.temperature }));
+  chart.update();
 }
 
 function updateCharts(points) {
@@ -194,14 +234,17 @@ async function refreshSystem() {
 
 async function refresh() {
   try {
-    const [dataRes, latestRes] = await Promise.all([
+    const [dataRes, latestRes, outdoorRes] = await Promise.all([
       fetch(`/api/data?range=${currentRange}`),
       fetch(`/api/latest`),
+      fetch(`/api/outdoor?range=${currentRange}`),
     ]);
     const data = await dataRes.json();
     const latest = await latestRes.json();
+    const outdoor = await outdoorRes.json();
 
     updateCharts(data.points || []);
+    updateOutdoor(outdoor.points || []);
     renderTiles(latest.latest);
 
     const status = document.getElementById("status");
@@ -243,6 +286,15 @@ function restyleCharts() {
     tt.borderColor = cssVar("--border");
     chart.update();
   });
+  // Série extérieure (2ᵉ dataset du graphe température) : sa couleur ne suit pas la clé.
+  const outdoor = charts.temperature?.data.datasets[1];
+  if (outdoor) {
+    const oc = cssVar("--c-outdoor");
+    outdoor.borderColor = oc;
+    outdoor.pointHoverBackgroundColor = oc;
+    outdoor.pointHoverBorderColor = cssVar("--surface");
+    charts.temperature.update();
+  }
 }
 
 document.getElementById("ranges").addEventListener("click", (e) => {
@@ -263,6 +315,23 @@ document.getElementById("theme-toggle").addEventListener("click", () => {
   renderTiles(lastPoints.length ? lastPoints[lastPoints.length - 1] : null);
 });
 
+// Légende cliquable "Extérieur" : affiche/masque la courbe et mémorise le choix.
+const outdoorToggle = document.getElementById("outdoor-toggle");
+
+function syncOutdoorToggle() {
+  outdoorToggle.classList.toggle("off", !outdoorEnabled);
+  outdoorToggle.setAttribute("aria-pressed", String(outdoorEnabled));
+  const ds = charts.temperature.data.datasets[1];
+  if (ds) { ds.hidden = !outdoorEnabled; charts.temperature.update(); }
+}
+
+outdoorToggle.addEventListener("click", () => {
+  outdoorEnabled = !outdoorEnabled;
+  localStorage.setItem("outdoorEnabled", String(outdoorEnabled));
+  syncOutdoorToggle();
+});
+
 initCharts();
+syncOutdoorToggle();
 refresh();
 setInterval(refresh, 30000);
